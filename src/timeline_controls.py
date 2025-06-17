@@ -122,7 +122,7 @@ class TimelineControls(QWidget):
             self.current_time += 20 * self.playback_speed  # 20ms * speed
             
             if self.current_time >= self.duration:
-                self.current_time = self.duration
+                self.current_time = 0.0  # 最初に戻す
                 self.pause()
                 
             self.update_ui()
