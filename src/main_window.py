@@ -11,7 +11,7 @@ from .project_manager import ProjectManager
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Motion Tool")
+        self.setWindowTitle("rinachoreo")
         self.setGeometry(100, 100, 1200, 800)
         
         self.project_manager = ProjectManager()
@@ -51,6 +51,10 @@ class MainWindow(QMainWindow):
         
         preview_label = QLabel("3D Preview")
         preview_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        preview_label.setMaximumHeight(20)  # 高さを制限
+        font = preview_label.font()
+        font.setPointSize(8)  # フォントサイズを小さく
+        preview_label.setFont(font)
         preview_layout.addWidget(preview_label)
         
         self.preview_3d = Preview3D()
@@ -65,6 +69,10 @@ class MainWindow(QMainWindow):
         self.timeline_controls.time_changed.connect(self.on_time_changed)
         self.timeline_controls.play_pause_toggled.connect(self.on_play_pause)
         self.graph_editor.motion_changed.connect(self.on_motion_changed)
+        
+        # Duration同期
+        self.timeline_controls.duration_spinbox.valueChanged.connect(self.on_duration_changed)
+        self.graph_editor.duration_spinbox.valueChanged.connect(self.on_duration_changed)
         
     def setup_menu(self):
         menubar = self.menuBar()
@@ -146,6 +154,22 @@ class MainWindow(QMainWindow):
         angles = self.graph_editor.get_angles_at_time(current_time)
         self.preview_3d.update_pose(angles)
         
+    def on_duration_changed(self, value):
+        """Duration変更時の同期"""
+        # 送信者を確認して無限ループを防ぐ
+        sender = self.sender()
+        
+        if sender == self.timeline_controls.duration_spinbox:
+            self.graph_editor.duration_spinbox.blockSignals(True)
+            self.graph_editor.duration_spinbox.setValue(value)
+            self.graph_editor.on_duration_changed(value)
+            self.graph_editor.duration_spinbox.blockSignals(False)
+        elif sender == self.graph_editor.duration_spinbox:
+            self.timeline_controls.duration_spinbox.blockSignals(True)
+            self.timeline_controls.duration_spinbox.setValue(value)
+            self.timeline_controls.on_duration_changed(value)
+            self.timeline_controls.duration_spinbox.blockSignals(False)
+        
     def new_project(self):
         self.project_manager.new_project()
         self.graph_editor.reset()
@@ -179,7 +203,25 @@ class MainWindow(QMainWindow):
         self.project_manager.export_csv(data, duration)
         
     def load_3d_model(self):
-        self.preview_3d.load_model()
+        from PyQt6.QtWidgets import QFileDialog, QMessageBox
+        file_dialog = QFileDialog()
+        file_path, _ = file_dialog.getOpenFileName(
+            self, 
+            "Load 3D Model", 
+            "", 
+            "GLTF Files (*.gltf *.glb);;All Files (*)"
+        )
+        
+        if file_path:
+            if self.preview_3d.opengl_widget.load_gltf_model(file_path):
+                self.preview_3d.model_label.setText(f"Model: {file_path.split('/')[-1]}")
+                self.preview_3d.opengl_widget.update()
+            else:
+                QMessageBox.warning(
+                    self, 
+                    "Load Error", 
+                    "Failed to load 3D model. Using default model."
+                )
         
     def undo(self):
         self.graph_editor.undo()

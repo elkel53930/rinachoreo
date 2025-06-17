@@ -28,28 +28,30 @@ class TimelineControls(QWidget):
         
     def setup_ui(self):
         layout = QHBoxLayout(self)
+        layout.setContentsMargins(5, 2, 5, 2)  # マージンを小さく
         
         # 再生ボタン
         self.play_button = QPushButton("▶")
-        self.play_button.setFixedSize(40, 30)
+        self.play_button.setFixedSize(30, 20)  # ボタンを小さく
         self.play_button.clicked.connect(self.toggle_play_pause)
         layout.addWidget(self.play_button)
         
         # 停止ボタン
         self.stop_button = QPushButton("⏹")
-        self.stop_button.setFixedSize(40, 30)
+        self.stop_button.setFixedSize(30, 20)  # ボタンを小さく
         self.stop_button.clicked.connect(self.stop)
         layout.addWidget(self.stop_button)
         
         # 巻き戻しボタン
         self.rewind_button = QPushButton("⏮")
-        self.rewind_button.setFixedSize(40, 30)
+        self.rewind_button.setFixedSize(30, 20)  # ボタンを小さく
         self.rewind_button.clicked.connect(self.rewind)
         layout.addWidget(self.rewind_button)
         
         # 時間表示
         self.time_label = QLabel("00:00")
-        self.time_label.setMinimumWidth(50)
+        self.time_label.setMinimumWidth(40)
+        self.time_label.setMaximumHeight(20)
         layout.addWidget(self.time_label)
         
         # シークバー
@@ -57,32 +59,43 @@ class TimelineControls(QWidget):
         self.seek_slider.setMinimum(0)
         self.seek_slider.setMaximum(int(self.duration))
         self.seek_slider.setValue(0)
+        self.seek_slider.setMaximumHeight(20)
         self.seek_slider.valueChanged.connect(self.on_seek_changed)
         layout.addWidget(self.seek_slider)
         
         # 合計時間表示
         self.duration_label = QLabel("05:00")
-        self.duration_label.setMinimumWidth(50)
+        self.duration_label.setMinimumWidth(40)
+        self.duration_label.setMaximumHeight(20)
         layout.addWidget(self.duration_label)
         
         # 再生速度
-        layout.addWidget(QLabel("Speed:"))
+        speed_label = QLabel("Speed:")
+        speed_label.setMaximumHeight(20)
+        layout.addWidget(speed_label)
         self.speed_spinbox = QDoubleSpinBox()
         self.speed_spinbox.setRange(0.1, 3.0)
         self.speed_spinbox.setValue(1.0)
         self.speed_spinbox.setSingleStep(0.1)
         self.speed_spinbox.setSuffix("x")
+        self.speed_spinbox.setMaximumHeight(20)
         self.speed_spinbox.valueChanged.connect(self.on_speed_changed)
         layout.addWidget(self.speed_spinbox)
         
         # 長さ設定
-        layout.addWidget(QLabel("Duration:"))
+        duration_label = QLabel("Duration:")
+        duration_label.setMaximumHeight(20)
+        layout.addWidget(duration_label)
         self.duration_spinbox = QSpinBox()
         self.duration_spinbox.setRange(1000, 60000)
         self.duration_spinbox.setValue(5000)
         self.duration_spinbox.setSuffix(" ms")
+        self.duration_spinbox.setMaximumHeight(20)
         self.duration_spinbox.valueChanged.connect(self.on_duration_changed)
         layout.addWidget(self.duration_spinbox)
+        
+        # ウィジェット全体の最大高さを設定
+        self.setMaximumHeight(30)
         
     def toggle_play_pause(self):
         """再生/停止切り替え"""

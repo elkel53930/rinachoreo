@@ -1,0 +1,13 @@
+# rinachoreo Configuration File
+# 角度設定（単位：radians）
+
+angle_limits:
+  j1_yaw:
+    min: -0.785 # -45度
+    max: 0.785  # +45度
+  j2_roll:
+    min: -0.785 # -45度
+    max: 0.785  # +45度
+  j3_pitch:
+    min: -0.785 # -45度
+    max: 0.785  # +45度

@@ -41,6 +41,16 @@ class OpenGLWidget(QOpenGLWidget):
         # GLTF model data
         self.gltf_meshes = []  # 複数のメッシュを格納
         
+        # デフォルトモデルとしてboard.glbを読み込み
+        try:
+            board_path = "board.glb"
+            if self.load_gltf_model(board_path):
+                print(f"Loaded default model: {board_path}")
+            else:
+                print("Failed to load board.glb, using default cube")
+        except Exception as e:
+            print(f"Error loading default model: {e}")
+        
         self.setMinimumSize(400, 300)
         
     def initializeGL(self):
@@ -115,6 +125,10 @@ class OpenGLWidget(QOpenGLWidget):
         
         # J3 (Pitch) - Z軸回転
         glRotatef(math.degrees(self.angles['j3']), 0, 0, 1)
+        
+        # board.glbの場合は+90度Roll補正を適用
+        if self.gltf_meshes:
+            glRotatef(90.0, 1, 0, 0)  # board.glbの-90度回転を補正
         
         # モデル描画
         if self.gltf_meshes:
@@ -399,18 +413,13 @@ class Preview3D(QWidget):
     def setup_ui(self):
         layout = QVBoxLayout(self)
         
-        # コントロールパネル
-        control_layout = QHBoxLayout()
-        
-        self.load_button = QPushButton("Load Model")
-        self.load_button.clicked.connect(self.load_model)
-        control_layout.addWidget(self.load_button)
-        
-        self.model_label = QLabel("Default Model")
-        control_layout.addWidget(self.model_label)
-        
-        control_layout.addStretch()
-        layout.addLayout(control_layout)
+        # モデル名表示のみ
+        self.model_label = QLabel("Model: board.glb")
+        self.model_label.setMaximumHeight(20)
+        font = self.model_label.font()
+        font.setPointSize(8)
+        self.model_label.setFont(font)
+        layout.addWidget(self.model_label)
         
         # OpenGLウィジェット
         self.opengl_widget = OpenGLWidget()

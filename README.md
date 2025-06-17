@@ -66,8 +66,8 @@ python -m src.main_window
 
 ### ロボット仕様
 - **対象軸**: J1 (Yaw), J2 (Roll), J3 (Pitch)
-- **角度範囲**: 各軸 ±90° (-π/2 to +π/2)
-- **範囲調整**: GUI上で軸ごとに編集可能
+- **角度範囲**: config.yamlで軸ごとに設定可能
+- **デフォルト**: 各軸 ±90° (-π/2 to +π/2)
 
 ### 色分け
 - **J1 (Yaw)**: 青
@@ -84,6 +84,23 @@ time(ms), J1(rad), J2(rad), J3(rad)
 
 ### 補間方法
 - Catmull-Rom スプライン補間（通過型）
+
+### 角度制限の設定
+config.yamlファイルを編集して軸ごとに角度制限を設定できます：
+
+```yaml
+# rinachoreo Configuration File
+angle_limits:
+  j1_yaw:
+    min: -3.14  # -180度
+    max: 3.14   # +180度
+  j2_roll:
+    min: -1.57  # -90度
+    max: 1.57   # +90度
+  j3_pitch:
+    min: -0.785 # -45度
+    max: 0.785  # +45度
+```
 
 ## プロジェクト構造
 
