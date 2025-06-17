@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import (QWidget, QHBoxLayout, QPushButton, QSlider, 
                              QLabel, QDoubleSpinBox, QSpinBox)
-from PyQt6.QtCore import Qt, QTimer, pyqtSignal
+from PyQt6.QtCore import Qt, QTimer, QElapsedTimer, pyqtSignal
 from PyQt6.QtGui import QIcon
 
 class TimelineControls(QWidget):
@@ -19,6 +19,10 @@ class TimelineControls(QWidget):
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_playback)
         self.timer.setInterval(20)  # 50 FPS
+        
+        # 正確な時間計測用
+        self.elapsed_timer = QElapsedTimer()
+        self.playback_start_time = 0.0
         
         self.setup_ui()
         
@@ -92,6 +96,8 @@ class TimelineControls(QWidget):
         if not self.is_playing:
             self.is_playing = True
             self.play_button.setText("⏸")
+            self.playback_start_time = self.current_time
+            self.elapsed_timer.start()
             self.timer.start()
             self.play_pause_toggled.emit(True)
             
@@ -119,7 +125,9 @@ class TimelineControls(QWidget):
     def update_playback(self):
         """再生時の時間更新"""
         if self.is_playing:
-            self.current_time += 20 * self.playback_speed  # 20ms * speed
+            # 実際の経過時間を使用してより正確な再生速度を実現
+            elapsed_ms = self.elapsed_timer.elapsed()
+            self.current_time = self.playback_start_time + (elapsed_ms * self.playback_speed)
             
             if self.current_time >= self.duration:
                 self.current_time = 0.0  # 最初に戻す
